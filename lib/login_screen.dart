@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:registration_app/homescreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,10 +14,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController idController = TextEditingController();
   TextEditingController passController = TextEditingController();
+
   double screenHeight = 0;
   double screenWidth = 0;
 
   Color primary = const Color(0xFFEEF444C);
+
+  late SharedPreferences sharedPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -68,22 +73,77 @@ class _LoginScreenState extends State<LoginScreen> {
                 customFeild("Enter your Student Number", idController, false),
                 fieldTitle("Password"),
                 customFeild("Enter your Password", passController, true),
-                Container(
-                  height: 60,
-                  width: screenWidth,
-                  margin: EdgeInsets.only(top: screenHeight / 40),
-                  decoration: BoxDecoration(
-                    color: primary,
-                    borderRadius: const BorderRadius.all(Radius.circular(30))
-                  ),
-                  child: Center(
-                    child: Text(
-                      "LOGIN",
-                      style: TextStyle(
-                        fontFamily: "Nexa Bold",
-                        fontSize: screenWidth /26,
-                        color: Colors.white,
-                        letterSpacing: 2,
+                GestureDetector(
+                  onTap: () async {
+                    FocusScope.of(context).unfocus();
+                    String id = idController.text.trim();
+                    String password = passController.text.trim();
+
+                    if(id.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Student Number is still empty!"),
+                        ));
+                    } else if(password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Password is still empty!"),
+                        ));
+                    } else {
+                        QuerySnapshot snap = await FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: id).get();
+
+                        try {
+                          if(password == snap.docs[0]['Password']) {
+                            sharedPreferences = await SharedPreferences.getInstance();
+
+
+                            sharedPreferences.setString('student_number', id).then((_) {
+                              Navigator.pushReplacement(context, 
+                              MaterialPageRoute(builder: (context) => Homescreen())
+                            );
+
+                            });
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text("Password is incorrect"),
+                            )); 
+                          }
+                        } catch(e) {
+                          String error =" ";
+
+                          print(e.toString());
+                          if(e.toString() == "RangeError (index): Invalid value: Valid value range is empty: 0") {
+                            setState(() {
+                              error = "Student Number does not exit";
+                            });
+                          } else {
+                            setState(() {
+                              error = "Error occured!";
+                            });
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(error),
+                          )); 
+                        }
+                    }
+
+                  },
+                  child: Container(
+                    height: 60,
+                    width: screenWidth,
+                    margin: EdgeInsets.only(top: screenHeight / 40),
+                    decoration: BoxDecoration(
+                      color: primary,
+                      borderRadius: const BorderRadius.all(Radius.circular(30))
+                    ),
+                    child: Center(
+                      child: Text(
+                        "LOGIN",
+                        style: TextStyle(
+                          fontFamily: "Nexa Bold",
+                          fontSize: screenWidth /26,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
                       ),
                     ),
                   ),
