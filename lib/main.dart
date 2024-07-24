@@ -2,7 +2,7 @@ import 'dart:async' show Future;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:registration_app/firebase_options.dart';
-import 'package:registration_app/homescreen.dart';
+import 'package:registration_app/home_screen.dart';
 import 'package:registration_app/login_screen.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:shared_preferences/shared_preferences.dart';
