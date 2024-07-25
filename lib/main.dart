@@ -5,6 +5,7 @@ import 'package:registration_app/firebase_options.dart';
 import 'package:registration_app/home_screen.dart';
 import 'package:registration_app/login_screen.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:registration_app/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async{
@@ -59,6 +60,7 @@ class _AuthCheckState extends State<AuthCheck> {
     try {
       if(sharedPreferences.getString('student_number') != null) {
         setState(() {
+          User.username = sharedPreferences.getString('student_number')!;
           userAvailable = true;
         });
       }
