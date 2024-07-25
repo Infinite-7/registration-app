@@ -30,7 +30,7 @@ class _TodayScreenState extends State<TodayScreen> {
 
   void _getRecord() async {
     try {
-      QuerySnapshot snap = await  FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: User.username).get();
+      QuerySnapshot snap = await  FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: User.studentNumber).get();
 
       DocumentSnapshot snap2 = await FirebaseFirestore.instance.collection("Students").doc(snap.docs[0].id).collection("Record").doc(DateFormat('dd MMMM yyyy ').format(DateTime.now())).get();
 
@@ -71,7 +71,7 @@ class _TodayScreenState extends State<TodayScreen> {
             Container(
               alignment: Alignment.centerLeft,
               child: Text(
-                User.username,
+                User.studentNumber,
                 style: TextStyle(
                   fontFamily: "Nexa Bold",
                   fontSize: screenWidth / 18, 
@@ -212,34 +212,35 @@ class _TodayScreenState extends State<TodayScreen> {
                     innerColor: primary,
                     key: key,
                     onSubmit: () async {
-                      Timer(Duration(seconds: 1), () {
-                        key.currentState!.reset();
-                      });
-                      
-                      QuerySnapshot snap = await  FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: User.username).get();
+                      QuerySnapshot snap = await  FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: User.studentNumber).get();
 
                       DocumentSnapshot snap2 = await FirebaseFirestore.instance.collection("Students").doc(snap.docs[0].id).collection("Record").doc(DateFormat('dd MMMM yyyy ').format(DateTime.now())).get();
                       
                       try {
                         String checkIn = snap2['checkIn'];
+
                         setState(() {
-                          checkIn =DateFormat('hh:mm').format(DateTime.now());
+                          checkOut =DateFormat('hh:mm').format(DateTime.now());
                         });
 
                         await FirebaseFirestore.instance.collection("Students").doc(snap.docs[0].id).collection("Record").doc(DateFormat('dd MMMM yyyy ').format(DateTime.now())).update({
+                          'date': Timestamp.now(),
                           'checkIn': checkIn,
                           'checkOut': DateFormat('hh:mm').format(DateTime.now()),
                         });
 
                       } catch (e) {
                         setState(() {
-                          checkOut =DateFormat('hh:mm').format(DateTime.now());
+                          checkIn =DateFormat('hh:mm').format(DateTime.now());
                         });
                         await FirebaseFirestore.instance.collection("Students").doc(snap.docs[0].id).collection("Record").doc(DateFormat('dd MMMM yyyy ').format(DateTime.now())).set({
+                          'date': Timestamp.now(),
                           'checkIn': DateFormat('hh:mm').format(DateTime.now()),
+                          'checkOut': "--/--",
                         });
                       }
 
+                      key.currentState!.reset();
                     }
                   );
                 },

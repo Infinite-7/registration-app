@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:registration_app/calendar_screen.dart';
+import 'package:registration_app/model/user.dart';
 import 'package:registration_app/profile_screen.dart';
 import 'package:registration_app/today_screen.dart';
 
@@ -15,6 +17,8 @@ class _HomescreenState extends State<Homescreen> {
   double screenHeight = 0;
   double screenWidth = 0;
 
+  String id = '';
+
   Color primary = const Color(0xFFEEF444C);
 
   int currentIndex =1;
@@ -24,6 +28,21 @@ class _HomescreenState extends State<Homescreen> {
     FontAwesomeIcons.check,
     FontAwesomeIcons.user
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    getId();
+  }
+
+  void getId() async {
+    QuerySnapshot snap = await FirebaseFirestore.instance.collection("Students").where('Student Number', isEqualTo: User.studentNumber).get();
+
+    setState(() {
+      User.id =snap.docs[0].id;
+    });
+  }
 
 
   @override
