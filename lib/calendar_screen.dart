@@ -72,6 +72,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 secondary: primary,
                                 onSecondary: Colors.white,
                               ),
+                              textButtonTheme: TextButtonThemeData(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: primary,
+                                ),
+                              ),
+                              textTheme: const TextTheme(
+                                headlineMedium: TextStyle(
+                                  fontFamily: "Nexa Bold",
+                                ),
+                              )
                             ),
                             child: child!,
                           );

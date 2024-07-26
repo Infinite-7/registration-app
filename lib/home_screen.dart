@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:registration_app/calendar_screen.dart';
 import 'package:registration_app/model/user.dart';
 import 'package:registration_app/profile_screen.dart';
+import 'package:registration_app/services/location_service.dart';
 import 'package:registration_app/today_screen.dart';
 
 class Homescreen extends StatefulWidget {
@@ -32,8 +33,24 @@ class _HomescreenState extends State<Homescreen> {
   @override
   void initState() {
     super.initState();
-
+    _startLocationService();
     getId();
+  }
+
+  void _startLocationService() async {
+    LocationService().initialize();
+
+    LocationService().getLongitude().then((value) {
+      setState(() {
+        User.long = value!;
+      });
+
+      LocationService().getLatitude().then((onValue) {
+        setState(() {
+          User.lat = value!;
+        });
+      });
+    }); 
   }
 
   void getId() async {
