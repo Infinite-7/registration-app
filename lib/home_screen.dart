@@ -18,7 +18,7 @@ class _HomescreenState extends State<Homescreen> {
   double screenHeight = 0;
   double screenWidth = 0;
 
-  String id = '';
+  // String id = '';
 
   Color primary = const Color(0xFFEEF444C);
 

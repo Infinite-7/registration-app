@@ -26,6 +26,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Container(
@@ -34,7 +35,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Text(
                 "My Attendance",
                 style: TextStyle(
-                  color: Colors.black54,
                   fontFamily: "Nexa Bold",
                   fontSize: screenWidth / 18, 
                 ),
@@ -43,19 +43,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Stack(
               children: [
                 Container(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.centerLeft,
                   margin: const EdgeInsets.only(top: 32),
                   child: Text(
                     _month,
                     style: TextStyle(
-                      color: Colors.black54,
                       fontFamily: "Nexa Bold",
                       fontSize: screenWidth / 18, 
                     ),
                   ),
                 ),
                 Container(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.centerRight,
                   margin: const EdgeInsets.only(top: 32),
                   child: GestureDetector(
                     onTap: () async {
@@ -97,7 +96,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     child: Text(
                       "Pick a Month",
                       style: TextStyle(
-                        color: Colors.black54,
                         fontFamily: "Nexa Bold",
                         fontSize: screenWidth / 18, 
                       ),
