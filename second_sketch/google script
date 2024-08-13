@@ -1,0 +1,114 @@
+function exportDataFromFirebase() {
+  try {
+    // Firebase Realtime Database URL
+    const firebaseUrl = 'https://class-registration-system-default-rtdb.firebaseio.com/uids.json'; // Replace with your Firebase URL
+
+    // Fetch data from Firebase
+    const response = UrlFetchApp.fetch(firebaseUrl);
+    const data = JSON.parse(response.getContentText());
+
+    // Log raw response for debugging
+    Logger.log('Raw Response: ' + JSON.stringify(data));
+
+    // Check if data is empty
+    if (!data || Object.keys(data).length === 0) {
+      Logger.log('No data found in Firebase.');
+      return;
+    }
+
+    // Google Sheets ID
+    const sheetId = '1kENAJAryFpckG422SQlygPLGWejoL5o4ARW5rywOjRw'; // Replace with your Google Sheets ID
+
+    // Open the Google Sheet
+    const spreadsheet = SpreadsheetApp.openById(sheetId);
+
+    // Iterate over the data entries to create a map of dates to entries
+    const dateEntriesMap = {};
+    for (const uid in data) {
+      if (data.hasOwnProperty(uid)) {
+        const record = data[uid];
+        const entryDate = new Date(record.clockin_time ? record.clockin_time.split(' ')[0] : new Date());
+        const entryDateString = Utilities.formatDate(entryDate, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+        
+        if (!dateEntriesMap[entryDateString]) {
+          dateEntriesMap[entryDateString] = [];
+        }
+        
+        dateEntriesMap[entryDateString].push({
+          uid: uid,
+          name: record.name,
+          number: record.number,
+          clockin_time: record.clockin_time,
+          clockout_time: record.clockout_time,
+          state: record.state
+        });
+      }
+    }
+
+    // Process each date's entries
+    for (const entryDateString in dateEntriesMap) {
+      if (dateEntriesMap.hasOwnProperty(entryDateString)) {
+        const entries = dateEntriesMap[entryDateString];
+
+        // Create or get the sheet for the entry date
+        let sheet = spreadsheet.getSheetByName(entryDateString);
+        if (!sheet) {
+          // Create a new sheet with the date as the name
+          sheet = spreadsheet.insertSheet(entryDateString);
+          // Write headers to the new sheet
+          const headers = ['UID', 'Name', 'Number', 'Clock In Time', 'Clock Out Time', 'State'];
+          sheet.appendRow(headers);
+        } else {
+          // If the sheet already exists, check if headers are missing and add them if necessary
+          const existingHeaders = sheet.getRange(1, 1, 1, 6).getValues()[0];
+          if (existingHeaders[0] !== 'UID' || existingHeaders[1] !== 'Name' || existingHeaders[2] !== 'Number' ||
+              existingHeaders[3] !== 'Clock In Time' || existingHeaders[4] !== 'Clock Out Time' || existingHeaders[5] !== 'State') {
+            const headers = ['UID', 'Name', 'Number', 'Clock In Time', 'Clock Out Time', 'State'];
+            sheet.insertRowBefore(1);
+            sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+          }
+        }
+
+        // Check for duplicates using the sheet data
+        const dataRange = sheet.getDataRange();
+        const dataValues = dataRange.getValues();
+
+        // Iterate over the entries for the date
+        for (const entry of entries) {
+          const rowData = [
+            entry.uid,
+            entry.name,
+            entry.number,
+            entry.clockin_time,
+            entry.clockout_time,
+            entry.state
+          ];
+
+          // Check if the data for this UID has already been exported
+          let alreadyExported = false;
+          for (let i = 1; i < dataValues.length; i++) { // Start from 1 to skip headers
+            const row = dataValues[i];
+            if (row[0] === rowData[0] && row[3] === rowData[3] && row[4] === rowData[4]) {
+              alreadyExported = true;
+              break;
+            }
+          }
+
+          // Log row data for debugging
+          Logger.log('Row Data: ' + JSON.stringify(rowData));
+
+          // Append the data to the sheet if not already exported
+          if (!alreadyExported) {
+            sheet.appendRow(rowData);
+          } else {
+            Logger.log('UID ' + entry.uid + ' with clock-in and clock-out times already exported for this date.');
+          }
+        }
+      }
+    }
+
+    Logger.log('Data exported successfully.');
+  } catch (error) {
+    Logger.log('Error exporting data: ' + error.message);
+  }
+}
